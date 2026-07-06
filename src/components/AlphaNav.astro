@@ -1,0 +1,25 @@
+---
+interface Props {
+  letters: string[];
+}
+
+const { letters } = Astro.props;
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+---
+
+<nav class="flex flex-wrap gap-1 font-sans text-sm" aria-label="Alphabetical index">
+  {ALPHABET.map((letter) => (
+    letters.includes(letter) ? (
+      <a
+        href={`#letter-${letter}`}
+        class="w-7 h-7 flex items-center justify-center rounded hover:bg-gold-pale hover:text-gold transition-colors text-ink-light"
+      >
+        {letter}
+      </a>
+    ) : (
+      <span class="w-7 h-7 flex items-center justify-center text-ink-light/30">
+        {letter}
+      </span>
+    )
+  ))}
+</nav>

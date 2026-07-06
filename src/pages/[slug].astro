@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection, getEntry, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('entries');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const typeColors: Record<string, string> = {
+  person: 'bg-amber-100 text-amber-800',
+  place: 'bg-emerald-100 text-emerald-800',
+  book: 'bg-indigo-100 text-indigo-800',
+};
+const colorClass = typeColors[entry.data.entryType] || 'bg-gray-100 text-gray-800';
+
+const crossRefs = entry.data.crossReferences.length
+  ? await Promise.all(entry.data.crossReferences.map((slug) => getEntry('entries', slug)))
+  : [];
+---
+
+<BaseLayout title={entry.data.headword}>
+  <article class="max-w-3xl mx-auto px-4 py-10">
+    <a href="/" class="font-sans text-sm text-gold hover:text-gold-light transition-colors mb-6 inline-flex items-center gap-1">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Browse
+    </a>
+
+    <header class="mb-8">
+      <div class="flex items-center gap-3 mb-3">
+        <span class={`font-sans text-xs font-medium px-2.5 py-1 rounded-full ${colorClass}`}>
+          {entry.data.entryType}
+        </span>
+        {entry.data.status === 'stub' && (
+          <span class="font-sans text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-800">
+            stub &mdash; unreviewed
+          </span>
+        )}
+      </div>
+      <h1 class="font-sans font-bold text-3xl md:text-4xl text-ink leading-tight mb-2">
+        {entry.data.headword}
+      </h1>
+      {entry.data.aliases.length > 0 && (
+        <p class="font-sans text-base text-ink-light">also {entry.data.aliases.join(', ')}</p>
+      )}
+      {entry.data.sourceCitation && (
+        <p class="font-sans text-sm text-ink-light/70 mt-1">{entry.data.sourceCitation}</p>
+      )}
+    </header>
+
+    <div class="entry-content prose prose-lg max-w-none
+      prose-headings:font-sans prose-headings:text-ink
+      prose-h2:text-xl prose-h2:font-bold prose-h2:mt-10 prose-h2:mb-4
+      prose-p:text-ink prose-p:leading-relaxed
+      prose-strong:text-ink prose-strong:font-semibold
+      prose-em:text-ink-light
+      prose-li:text-ink prose-li:leading-relaxed
+      prose-hr:border-gold/20 prose-hr:my-10
+      prose-a:text-gold prose-a:no-underline hover:prose-a:underline
+    ">
+      <Content />
+    </div>
+
+    {crossRefs.length > 0 && (
+      <div class="mt-8 callout callout-green">
+        <p class="font-sans text-sm font-semibold mb-2">See also</p>
+        <ul class="font-sans text-sm flex flex-wrap gap-x-4 gap-y-1">
+          {crossRefs.filter(Boolean).map((ref) => (
+            <li><a href={`/${ref!.id}`} class="text-gold hover:underline">{ref!.data.headword}</a></li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {entry.data.furtherReading.length > 0 && (
+      <div class="mt-6 font-sans text-sm text-ink-light">
+        <p class="font-semibold text-ink mb-1.5">Further reading</p>
+        <ul class="space-y-0.5">
+          {entry.data.furtherReading.map((ref) => (
+            <li>{ref.title} — {ref.author}{ref.year ? `, ${ref.year}` : ''}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .callout {
+    padding: 1rem 1.25rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    border-left: 4px solid;
+  }
+  .callout-green {
+    background: color-mix(in srgb, var(--color-green-muted) 12%, white);
+    border-color: var(--color-green-muted);
+    color: var(--color-ink);
+  }
+
+  /* Editorial Note — provenance-flagged contemporary content added during ingestion,
+     distinct from the 1867-87 source text. Authored as <div class="editorial-note"> in
+     the entry's markdown body (see EDITORIAL_NOTE convention in README). */
+  .entry-content :global(.editorial-note) {
+    background: color-mix(in srgb, var(--color-blue-muted) 10%, white);
+    border-left: 4px solid var(--color-blue-muted);
+    padding: 1rem 1.25rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-size: 0.95em;
+  }
+  .entry-content :global(.editorial-note p:first-child) {
+    margin-top: 0;
+  }
+</style>

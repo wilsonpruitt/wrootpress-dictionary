@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "headword": {
+      "type": "string"
+    },
+    "entryType": {
+      "type": "string",
+      "enum": [
+        "person",
+        "place",
+        "book"
+      ]
+    },
+    "aliases": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "default": "mcclintock-strong-1867",
+      "type": "string",
+      "enum": [
+        "mcclintock-strong-1867",
+        "original"
+      ]
+    },
+    "sourceCitation": {
+      "type": "string"
+    },
+    "scriptureRefs": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "book": {
+            "type": "string"
+          },
+          "chapterStart": {
+            "type": "number"
+          },
+          "verseStart": {
+            "type": "number"
+          },
+          "chapterEnd": {
+            "type": "number"
+          },
+          "verseEnd": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "book",
+          "chapterStart"
+        ]
+      }
+    },
+    "crossReferences": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "default": "stub",
+      "type": "string",
+      "enum": [
+        "stub",
+        "reviewed",
+        "published"
+      ]
+    },
+    "hasEditorialNote": {
+      "default": false,
+      "type": "boolean"
+    },
+    "furtherReading": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "year": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "author"
+        ]
+      }
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "headword",
+    "entryType"
+  ]
+}

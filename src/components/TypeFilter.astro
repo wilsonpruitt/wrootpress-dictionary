@@ -1,0 +1,62 @@
+---
+interface Props {
+  types: string[];
+}
+
+const { types } = Astro.props;
+
+const labels: Record<string, string> = {
+  person: 'Persons',
+  place: 'Places',
+  book: 'Books',
+};
+---
+
+<div class="flex flex-wrap gap-2 font-sans text-sm" id="type-filter">
+  <button
+    data-type="all"
+    class="filter-btn px-3 py-1.5 rounded-full border border-gold/30 text-ink-light hover:border-gold hover:text-gold transition-colors active"
+  >
+    All
+  </button>
+  {types.map((type) => (
+    <button
+      data-type={type}
+      class="filter-btn px-3 py-1.5 rounded-full border border-gold/30 text-ink-light hover:border-gold hover:text-gold transition-colors"
+    >
+      {labels[type] || type}
+    </button>
+  ))}
+</div>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+    const cards = document.querySelectorAll<HTMLElement>('[data-type-card]');
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.type;
+
+        buttons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        cards.forEach((card) => {
+          if (type === 'all' || card.dataset.typeCard === type) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<style>
+  .filter-btn.active {
+    background-color: var(--color-gold);
+    color: white;
+    border-color: var(--color-gold);
+  }
+</style>

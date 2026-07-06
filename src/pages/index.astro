@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EntryCard from '../components/EntryCard.astro';
+import TypeFilter from '../components/TypeFilter.astro';
+import AlphaNav from '../components/AlphaNav.astro';
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection('entries');
+const published = entries.filter((e) => e.data.status !== 'stub');
+const sorted = published.sort((a, b) => a.data.headword.localeCompare(b.data.headword));
+
+const types = [...new Set(sorted.map((e) => e.data.entryType))];
+
+const grouped = new Map<string, typeof sorted>();
+for (const entry of sorted) {
+  const letter = entry.data.headword[0].toUpperCase();
+  if (!grouped.has(letter)) grouped.set(letter, []);
+  grouped.get(letter)!.push(entry);
+}
+const letters = [...grouped.keys()];
+---
+
+<BaseLayout title="Browse">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="mb-10">
+      <h2 class="font-sans font-bold text-3xl text-ink mb-3">Wroot Press Dictionary</h2>
+      <p class="text-lg text-ink-light leading-relaxed max-w-2xl">
+        A digital edition of McClintock &amp; Strong's <em>Cyclopedia of Biblical, Theological,
+        and Ecclesiastical Literature</em> (1867&ndash;1887) — persons, places, and the books of
+        the Bible, with editorial notes flagging where contemporary scholarship has moved on.
+      </p>
+    </div>
+
+    <div class="mb-6">
+      <TypeFilter types={types} />
+    </div>
+
+    <div class="mb-8 sticky top-[73px] z-40 bg-parchment/90 backdrop-blur-sm py-2 -mx-4 px-4 border-b border-gold/10">
+      <AlphaNav letters={letters} />
+    </div>
+
+    <div id="entries-list">
+      {letters.map((letter) => (
+        <div id={`letter-${letter}`} class="mb-8 scroll-mt-32">
+          <h3 class="font-sans font-bold text-xl text-gold/60 mb-3">{letter}</h3>
+          <div class="grid gap-4">
+            {grouped.get(letter)!.map((entry) => (
+              <div data-type-card={entry.data.entryType}>
+                <EntryCard
+                  headword={entry.data.headword}
+                  entryType={entry.data.entryType}
+                  aliases={entry.data.aliases}
+                  sourceCitation={entry.data.sourceCitation}
+                  slug={entry.id}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-12 text-center font-sans text-sm text-ink-light">
+      <p>{sorted.length} entries &middot; {entries.length - sorted.length} stubs pending review</p>
+    </div>
+  </div>
+</BaseLayout>

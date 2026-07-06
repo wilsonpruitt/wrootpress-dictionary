@@ -1,0 +1,38 @@
+---
+interface Props {
+  headword: string;
+  entryType: 'person' | 'place' | 'book';
+  aliases: string[];
+  sourceCitation?: string;
+  slug: string;
+}
+
+const { headword, entryType, aliases, sourceCitation, slug } = Astro.props;
+
+const typeColors: Record<string, string> = {
+  person: 'bg-amber-100 text-amber-800',
+  place: 'bg-emerald-100 text-emerald-800',
+  book: 'bg-indigo-100 text-indigo-800',
+};
+
+const colorClass = typeColors[entryType] || 'bg-gray-100 text-gray-800';
+---
+
+<a href={`/${slug}`} class="group block">
+  <article class="border border-gold/15 rounded-lg p-5 hover:border-gold/40 hover:shadow-md transition-all duration-200 bg-white/50">
+    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+      <span class={`font-sans text-xs font-medium px-2 py-0.5 rounded-full ${colorClass}`}>
+        {entryType}
+      </span>
+    </div>
+    <h3 class="font-sans font-semibold text-lg text-ink group-hover:text-gold transition-colors leading-snug">
+      {headword}
+    </h3>
+    {aliases.length > 0 && (
+      <p class="font-sans text-sm text-ink-light mt-0.5">also {aliases.join(', ')}</p>
+    )}
+    {sourceCitation && (
+      <p class="font-sans text-xs text-ink-light/70 mt-2">{sourceCitation}</p>
+    )}
+  </article>
+</a>
